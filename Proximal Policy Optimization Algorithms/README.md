@@ -125,6 +125,32 @@ This approach hasn't get better results than the clipped surrogate objective.
 > In our experiments, we found that the KL penalty performed worse than the clipped surrogate objective, however, we’ve included it here because it’s an important baseline.
 
 ### Algorithm
+> If using a neural network architecture that shares parameters between the policy and value function, we must use a loss function that combines the policy surrogate and a value function error term. This objective can further be augmented by adding an entropy bonus to ensure sufficient exploration.
+
+$$
+L_t^{\text{CLIP + VF + S}} (\theta) = \mathop{\mathbb{\hat E}}_t [L_t^{\text{CLIP}}(\theta) - c_1  L_t^{\text{VF}}(\theta) -c_2 S[\pi_\theta](s_t)]
+$$
+
+where $c1$, $c2$ are coefficients, and $S$ denotes an entropy bonus, and $L_t^{\text{VF}}$ is a squared-error loss $(V_\theta(s_t) − V_t^{\text{targ}}(s_t))^2$.
+
+> One style of policy gradient implementation, popularized in and well-suited for use with recurrent neural networks, runs the policy for T timesteps (where T is much less than the episode length), and uses the collected samples for an update. This style requires an advantage estimator that does not look beyond timestep T.
+> 
+It can be, for example:
+
+$$
+\hat A_t = - V(s_t) + r_t +\gamma r_{t+1} + ... + \gamma^{T-t+1} r_{T-1} + \gamma^{T-t}V(S_T)
+$$
+
+where $t$ specifies the time index in $[0, T]$.
+
+
+A proximal policy optimization (PPO) algorithm that uses fixed-length trajectory segments is
+shown below.
+
+> Each iteration, each of N (parallel) actors collect T timesteps of data. Then we construct the surrogate loss on these NT timesteps of data, and optimize it with minibatch SGD (or usually for better performance, Adam), for K epochs.
+
+![Algorithm](ppo_algo.png)
+
 
 
 ## Related works
@@ -138,6 +164,7 @@ This approach hasn't get better results than the clipped surrogate objective.
 2. Fig. 2 explanation
 3. Why KL divergence is bad?
 4. Is the PPO a safe option to prevent gradient overshooting by the cost of performing more steps?
+5. Purpose of using $\lambda$ in the eq. 11? 
 
 
 ## [Comment] Call for help at the end of blog post  

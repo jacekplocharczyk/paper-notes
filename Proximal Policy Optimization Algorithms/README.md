@@ -57,7 +57,34 @@ $$
 \left.\nabla_\theta  L_{\pi_{\theta_0}} (\pi_{\theta}) \right |_{\theta_0} = \left.\nabla_\theta  \eta(\pi_{\theta}) \right |_{\theta_0} 
 $$
 
+The rest of equation has the notation from the PPO paper.
 #### Policy Gradient Methods
+The most popular policy objective function
+$$
+L^{PG}(\theta) =  \mathop{\mathbb{\hat E}}_t [\text{log} \pi_\theta  (a_t| s_t) \hat A_t]
+$$
+Its gradient
+$$
+\hat g =  \mathop{\mathbb{\hat E}}_t [\nabla _\theta\  \text{log} \pi_\theta  (a_t| s_t) \hat A_t]
+$$
+
+#### Trust Region Methods
+In the TRPO, an objective function is maximized subject to a
+constraint on the size of the policy update.
+$$
+\underset{\theta}{\text{maximize}} \ \mathop{\mathbb{\hat E}}_t  \left[ \frac{\pi_\theta  (a_t| s_t)}{\pi_{\theta \text{old}}  (a_t| s_t)} \hat A_t \right]
+$$
+
+$$
+\text{subject to} \ \mathop{\mathbb{\hat E}}_t  \left[ \text{KL}[ \pi_{\theta \text{old}} (\cdot| s_t), \pi_{\theta} (\cdot| s_t)] \right] \leq \delta
+$$
+
+KL divergence ensures that the next policy will be simillar to the previous one and we don't overshoot with the step size.
+
+#### Clipped Surrogate Objective
+
+
+
 
 
 ## Related works
@@ -65,7 +92,7 @@ $$
 2. [Trust Region Policy Optimization](https://arxiv.org/abs/1502.05477)
 3. [Sample Efficient Actor-Critic with Experience Replay - ACER](https://arxiv.org/abs/1611.01224)
 
-## Call for help at the end of blog post  
+## [Comment] Call for help at the end of blog post  
 >We’re looking for people to help build and optimize our reinforcement learning algorithm codebase. If you’re excited about RL, benchmarking, thorough experimentation, and open source, please apply, and mention that you read the baselines PPO post in your application.
 
 We are going to do it anyway and we could have track of the most popular algorithms.

@@ -21,6 +21,45 @@ Where:
 >This objective implements a way to do a Trust Region update which is compatible with Stochastic Gradient Descent, and simplifies the algorithm by removing the KL penalty and need to make adaptive updates.
 
 
+## Detailed analysis
+The goal of this section is to analyse each section of the paper.
+
+### Background: Policy Optimization
+
+#### Equations and notation from the [TRPO paper](https://arxiv.org/abs/1502.05477)
+Expected discounted reward when using policy $\pi$ ( $a_t \sim \pi(a_t|s_t)$ )
+$$
+\eta(\pi) = \mathop{\mathbb{E}}_{\pi} [\sum^\infin_{t=0}\gamma^t r(s_t)]
+$$
+
+Expected return of another policy $\tilde \pi$ in terms of the advantage over policy $\pi$
+
+$$
+\eta(\tilde \pi) = \eta(\pi) + \mathop{\mathbb{E}}_{\tilde \pi} [\sum^\infin_{t=0}\gamma^t A_\pi(a_t, s_t)]
+$$
+
+Local approximation to the above equation (we only compare the decision and follow the old policy $\pi$)
+
+$$
+L_\pi (\tilde \pi) = \eta(\pi) + \sum_s\rho_\pi (s) \sum_a \tilde\pi(a|s) A_\pi(a_t, s_t)
+$$
+
+where $\rho_\pi (s)$ is the (unnormalized) discounted visitation frequencies under policy $\pi$
+$$
+\rho_\pi (s) = P(s_0 = s) + \gamma P(s_1 = s)  + \gamma^2 P(s_2 = s)+...
+$$
+
+This approximation has the same gradient for $\theta_0$ (the policy parameters vector)
+$$
+L_{\pi_{\theta_0}} (\pi_{\theta_0}) = \eta(\pi_{\theta_0})
+$$
+$$
+\left.\nabla_\theta  L_{\pi_{\theta_0}} (\pi_{\theta}) \right |_{\theta_0} = \left.\nabla_\theta  \eta(\pi_{\theta}) \right |_{\theta_0} 
+$$
+
+#### Policy Gradient Methods
+
+
 ## Related works
 1. [OpenAI Algorithm implementations](https://github.com/openai/baselines)
 2. [Trust Region Policy Optimization](https://arxiv.org/abs/1502.05477)

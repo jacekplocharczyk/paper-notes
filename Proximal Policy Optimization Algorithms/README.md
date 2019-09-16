@@ -11,9 +11,9 @@ $$
 Where:
 - $\theta$ is the policy parameters vector
 - $\hat{E}_t$ is the empirical expectation over timesteps
-- $r_{t}$ is the following ratio:  [__Comment: not sure if this formula is correct__]
+- $r_{t}$ is the following ratio:
     $$
-    r_t = \frac{\pi_{new}(\cdot | s_t)}{\pi_{old}(\cdot | s_t)}
+    r_t = \frac{\pi_{new}(a_t | s_t)}{\pi_{old}(a_t | s_t)}
     $$
 - $\hat{A}_t$ is the estimated advantage at time $t$
 - $\varepsilon$ is a hyperparameter, usually 0.1 or 0.2
@@ -106,6 +106,26 @@ This provides us with the pesymistic evaluation of the policy comparing to the p
 
 
 ### Adaptive KL Penalty Coefficient
+Another approach is to use KL divergence directly in the objective function and using several epochs of minibatch SGD optimize it. For example, optimize:
+$$
+L^{\text{KLPEN}} (\theta) = \mathop{\mathbb{\hat E}}_t  \left[ r_t(\theta) \hat A_t  - \beta \text{KL}[ \pi_{\theta \text{old}} (\cdot| s_t), \pi_{\theta} (\cdot| s_t)]    \right]
+$$
+
+And after each iteration compute $d =  \text{KL}[ \pi_{\theta \text{old}} (\cdot| s_t), \pi_{\theta} (\cdot| s_t)]$. And compare $d$ with some arbitrary $d_{targ}$
+- If $d < d_{targ} / 1.5, \beta \lArr \beta/2$ 
+- If $d > d_{targ} \times  1.5, \beta \lArr \beta \times 2$ 
+  
+The updated $\beta$ is used for the next policy update.  
+
+> The parameters 1.5 and 2 above are chosen heuristically, but the algorithm is not very sensitive to them.  
+
+
+
+This approach hasn't get better results than the clipped surrogate objective.  
+> In our experiments, we found that the KL penalty performed worse than the clipped surrogate objective, however, we’ve included it here because it’s an important baseline.
+
+### Algorithm
+
 
 ## Related works
 1. [OpenAI Algorithm implementations](https://github.com/openai/baselines)
@@ -116,6 +136,8 @@ This provides us with the pesymistic evaluation of the policy comparing to the p
 ## Questions
 1. They proposed objective but what with the derivatives? How to get gradient of the clip function (make some intervals?)?
 2. Fig. 2 explanation
+3. Why KL divergence is bad?
+4. Is the PPO a safe option to prevent gradient overshooting by the cost of performing more steps?
 
 
 ## [Comment] Call for help at the end of blog post  

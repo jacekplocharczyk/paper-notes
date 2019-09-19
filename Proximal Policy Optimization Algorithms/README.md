@@ -22,7 +22,6 @@ Where:
 
 
 ## Detailed analysis
-The goal of this section is to analyse each section of the paper.
 
 ### Background: Policy Optimization
 
@@ -150,6 +149,8 @@ shown below.
 > Each iteration, each of N (parallel) actors collect T timesteps of data. Then we construct the surrogate loss on these NT timesteps of data, and optimize it with minibatch SGD (or usually for better performance, Adam), for K epochs.
 
 ![Algorithm](ppo_algo.png)
+
+### Experiments
 
 
 

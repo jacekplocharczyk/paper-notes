@@ -115,23 +115,64 @@ $$
 
 Let 
 $$
-D_{\text{KL}}^{\text{max}} = \underset{s}{\text{max}} \ D_{\text{KL}}(\pi(\cdot | s)||\tilde \pi(\cdot | s))
+D_{\text{KL}}^{\text{max}}(\pi, \tilde\pi) = \underset{s}{\text{max}} \ D_{\text{KL}}(\pi(\cdot | s)||\tilde \pi(\cdot | s))
 $$
 
 So the lower bound will be
 
 $$
-\eta(\pi_{\text{new}}) \geq L_{\pi_{\text{old}}}(\pi_{\text{new}}) - C D_{\text{KL}}^{\text{max}}
+\eta(\tilde\pi) \geq L_{\pi}(\tilde\pi) - C D_{\text{KL}}^{\text{max}} (\pi, \tilde\pi)
 $$
 where $C = \frac{4\epsilon\gamma}{(1 - \gamma) ^ 2}$
 
 In the paper there is a proof that making updates this way guaranteeing nondecreasing 
 expected return $\eta$.
 
-![Algorithm 1](trpo_algo_1.png)
+![Algorithm 1](trpo_algo_1.PNG)
 
 
 ### Optimization of Parameterized Policies
+> In the previous section, we considered the policy optimization
+> problem independently of the parameterization of $\pi$
+> and under the assumption that the policy can be evaluated
+> at all states.
+
+__Therefore we will change notation to express dependency on the policy parameters $\theta$.__
+
+By performing following maximization, we are guaranteed to imporve the true objective $\eta$
+
+$$
+\underset{\theta}{\text{maximize}}[L_{\theta{\text{old}}}(\theta) - C D_{\text{KL}}^{\text{max}}(\theta_{\text{old}}, \theta)]
+$$
+
+> In practice, if we used the penalty coefficient C recommended
+> by the theory above, the step sizes would be very
+> small. One way to take larger steps in a robust way is to use
+> a constraint on the KL divergence between the new policy
+> and the old policy, i.e., a trust region constraint:
+
+$$
+\underset{\theta}{\text{maximize }}L_{\theta{\text{old}}}(\theta)
+$$
+$$
+\text{suject to } D_{\text{KL}}^{\text{max}}(\theta_{\text{old}}, \theta) \leq \delta
+$$
+
+Because it is bounding KL divergence at every point in the space it is impractical to solve and we use heuristic approximation to the $D_{\text{KL}}^{\text{max}}$ by:
+
+$$
+\overline{D}_{\text{KL}}^{\rho_{\theta_{\text{old}}}} (\theta_1, \theta_2) := \mathop{\mathbb{E}}_{s \sim \rho} [D_{\text{KL}}(\pi_{\theta_1}(\cdot | s)||\pi_{\theta_2}(\cdot | s))]
+$$
+
+and optimize
+
+$$
+\underset{\theta}{\text{maximize }}L_{\theta{\text{old}}}(\theta)
+$$
+$$
+\text{suject to } \overline{D}_{\text{KL}}^{\rho_{\theta_{\text{old}}}}(\theta_{\text{old}}, \theta) \leq \delta
+$$
+
 
 
 ## Related works

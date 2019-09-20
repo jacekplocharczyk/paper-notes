@@ -173,6 +173,85 @@ $$
 \text{suject to } \overline{D}_{\text{KL}}^{\rho_{\theta_{\text{old}}}}(\theta_{\text{old}}, \theta) \leq \delta
 $$
 
+### Sample-Based Estimation of the Objective and Constraint
+
+We will expand previos equation to 
+
+$$
+\underset{\theta}{\text{maximize }} \sum_s \rho_{\theta{\text{old}}}(s) \sum_a \pi_\theta(a, s) A_{\theta_{\text{old}}}(s, a)
+$$
+$$
+\text{suject to } \overline{D}_{\text{KL}}^{\rho_{\theta_{\text{old}}}}(\theta_{\text{old}}, \theta) \leq \delta
+$$
+
+and do following approximations:
+1. Replace  $\sum_s \rho_{\theta{\text{old}}}(s)[...]$ with the expectation $\frac{1}{1 - \gamma}\mathop{\mathbb{E}}_{s\sim \rho_{\theta{\text{old}}}}[...]$ (in the maximization constant can be skipped)
+2. Replace $A_{\theta_{\text{old}}}$ with the Q-value $Q_{\theta_{\text{old}}}$ (it just adds constants to all the advantage functions)
+3. Replace the sum over the actions by an importance sampling estimator (equation for the contribution of a single state $s_n$):
+   $$
+   \sum_a \pi_\theta(a | s_n) A_{\theta_\text{old}}(s_n, a) = \mathop{\mathbb{E}}_{a \sim q} \left [ \frac{\pi_\theta(a| s_n)}{q(a|s_n)} A_{\theta_\text{old}}(s_n, a)                               \right ]
+   $$
+   where $q$ denotes sampling distribution
+
+Which provides us to equivalent form 
+
+$$
+\underset{\theta}{\text{maximize }} \mathop{\mathbb{E}}_{s\sim \rho_{\theta{\text{old}}}   ,a \sim q} \left [ \frac{\pi_\theta(a| s)}{q(a|s)} Q_{\theta_\text{old}}(s, a)  \right ]
+$$
+$$
+\text{suject to } \mathop{\mathbb{E}}_{s\sim \rho_{\theta{\text{old}}}} [D_{\text{KL}}(\pi_{\theta_{\text{old}}}(\cdot| s) \ || \ \pi_{\theta}(\cdot| s)) ]\leq \delta
+$$
+
+> All that remains is to replace the expectations by sample
+>averages and replace the $Q$ value by an empirical estimate.
+
+#### Single Path
+
+> In this estimation procedure, we collect a sequence of
+> states by sampling $s_0 \sim \rho_0$ and then simulating the policy
+> $\pi_\text{old}$ for some number of timesteps to generate a trajectory
+> $s_0, a_0, s_1, a_1, ... , s_{T-1}, a_{T-1}, s_T$. Hence, 
+> $q(a|s) = \pi_{\theta_\text{old}} (a|s)$. $Q_{\theta_\text{old}} (s, a)$ is 
+> computed at each state-action pair $(s_t, a_t)$ by taking the discounted sum 
+> of future rewards along the trajectory.
+
+#### Vine
+
+In this approach there is a following procedure:
+
+1. Sample starting state $s_0 \sim \rho_0$
+2. Simulate the policy $\pi_{\theta_i}$ to generate a number of trajectories
+3. Choose a subset of N states along these trajectories, denoted $s_1, s_2, ..., s_N$ - we will called it rollout set
+4. For each state $s_n$ sample $K$ actions accodring to $a_{n,k} \sim q(\cdot | s_n)$
+5. For each action $a_{n,k}$ at state $s_n$ estimate $\hat Q_{\theta_i}(s_n, a_{n,k})$ by performing rollout (short trajectory) starting with state $s_n$ and action $a_{n,k}$
+
+> In small, finite action spaces, we can generate a rollout for every possible action
+>  from a given state. The contribution to $L_\text{old}$ from a single state $s_n$ is as follows:
+> $$
+> L_n (\theta ) = \sum_{k=1}^{K} \pi_\theta(a_k|s_n)\hat Q(s_n, a_k)
+> $$
+> where the action space is $A = \{ a_1, a_2, ..., a_K \}$
+> 
+> In large or continuous state spaces, we can construct an estimator of the surrogate
+> objective using importance sampling. The self-normalized estimator of $L_\text{old}$
+> obtained at a single state $s_n$ is
+> $$
+> L_n (\theta ) = \frac{\sum_{k=1}^{K} \frac{\pi_\theta(a_{n,k}|s_n)}{\pi_{\theta_\text{old}}(a_{n,k}|s_n)}\hat Q(s_n, a_{n,k})} {\sum_{k=1}^{K} \frac{\pi_\theta(a_{n,k}|s_n)}{\pi_{\theta_\text{old}}(a_{n,k}|s_n)}}
+> $$
+
+> The benefit of the vine method over the single path method that is our local estimate 
+> of the objective has much lower variance given the same number of Q-value samples in
+>  the surrogate objective.
+
+>The downside of the vine method is that we must perform far more calls to the
+> simulator for each of these advantage estimates.
+
+
+### Practical Algorithm
+
+
+
+
 
 
 ## Related works
